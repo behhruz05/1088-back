@@ -1,6 +1,7 @@
 const express = require('express')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const swaggerSetup = require('./config/swagger')
 
 const connectDB = require('./config/db')
 const User = require('./model/user.model')
@@ -12,11 +13,49 @@ const protect = require('./middleware/auth.middleware')
 
 const app = express()
 app.use(express.json())
+swaggerSetup(app)
+
 
 /* =====================
    MongoDB CONNECT
 ===================== */
 connectDB()
+
+
+
+
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Yangi foydalanuvchi ro‘yxatdan o‘tadi
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Ali
+ *               email:
+ *                 type: string
+ *                 example: ali@gmail.com
+ *               password:
+ *                 type: string
+ *                 example: 123456
+ *     responses:
+ *       201:
+ *         description: Foydalanuvchi yaratildi
+ */
+
+
 
 /* =====================
    AUTH – REGISTER
@@ -56,6 +95,37 @@ app.post('/auth/register', async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 })
+
+
+
+
+
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Login qilish
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: ali@gmail.com
+ *               password:
+ *                 type: string
+ *                 example: 123456
+ *     responses:
+ *       200:
+ *         description: Login muvaffaqiyatli
+ */
 
 /* =====================
    AUTH – LOGIN
@@ -98,6 +168,21 @@ app.post('/auth/login', async (req, res) => {
     }
 })
 
+
+/**
+ * @swagger
+ * /students:
+ *   get:
+ *     summary: Barcha studentlarni olish
+ *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Studentlar ro‘yxati
+ */
+
+
 app.get('/students', protect, async (req, res) => {
     try {
         const students = await Student.find()
@@ -106,6 +191,41 @@ app.get('/students', protect, async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 })
+
+
+
+/**
+ * @swagger
+ * /students:
+ *   post:
+ *     summary: Yangi student qo‘shish
+ *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - age
+ *               - course
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Hasan
+ *               age:
+ *                 type: number
+ *                 example: 20
+ *               course:
+ *                 type: string
+ *                 example: Backend
+ *     responses:
+ *       201:
+ *         description: Student yaratildi
+ */
 
 
 app.post('/students', protect, async (req, res) => {
